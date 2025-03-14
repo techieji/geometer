@@ -1,0 +1,3 @@
+#!/bin/bash
+
+(gcc geometer.c render_tools.c execute.c -lSDL3 -g) && ./a.out
