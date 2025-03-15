@@ -6,6 +6,7 @@ SDL_Renderer* renderer;
 char buffer[256];
 uint8_t cursor = 0;
 enum OperationMode mode = MO_NORMAL;
+bool locked = false;
 
 struct IntermediatePoints* ip = NULL;
 struct UserObjectList objects = { NULL, NULL };
@@ -17,6 +18,7 @@ bool mainloop(void) {
     SDL_RenderClear(renderer);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_GetMouseState(&x, &y);
+    locked = lock(&x, &y);
     renderCursor(x, y);
     // TODO: rewrite corner_display as a more intelligent function (newline handling)
 #define CORNER_DISPLAY(x) SDL_RenderDebugText(renderer, 7, HEIGHT - 15, x)
@@ -24,6 +26,9 @@ bool mainloop(void) {
         switch (mode) {
             case MO_LINE:
                 CORNER_DISPLAY("-- LINE --");
+                break;
+            case MO_CIRCLE:
+                CORNER_DISPLAY("-- CIRCLE -- ");
                 break;
         }
     } else CORNER_DISPLAY(buffer);
@@ -63,6 +68,7 @@ bool mainloop(void) {
     }
 
     // TODO: Render user data
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     for (struct UserObjectSeq* item = objects.head; item != NULL; item = item->next)
         draw(item->here);
 
@@ -70,6 +76,9 @@ bool mainloop(void) {
     switch (mode) {
         case MO_LINE:
             if ((obj = drawIntermediateLine(x, y)) != NULL) append(&objects, obj);
+            break;
+        case MO_CIRCLE:
+            if ((obj = drawIntermediateCircle(x, y)) != NULL) append(&objects, obj);
             break;
     }
  

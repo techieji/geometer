@@ -15,21 +15,19 @@
 enum OperationMode {
     MO_NORMAL,    // No default actions (TODO: add navigation)
     MO_COMMAND,   // Enters data into command buffer
-    MO_LINE       // Draws a line (TODO)
+    MO_LINE,      // Draws a line
+    MO_CIRCLE     // Draws a circle (TODO)
 };
 
 struct UserObject {
     enum UserObjectType {
         OBJ_POINT,
         OBJ_LINE,
+        OBJ_CIRCLE,
         OBJ_BEZIER
     } type;
-    union {
-    //    struct { float px, py; }; // OBJ_POINT
-    //    struct { float p1x, p1y, p2x, p2y; };    // OBJ_LINE
-        struct {  // OBJ_BEZIER
-            float p1x, p1y, p2x, p2y, p3x, p3y, p4x, p4y;
-        };
+    struct {
+        float p1x, p1y, p2x, p2y, p3x, p3y, p4x, p4y;
     };
 };
 
@@ -53,14 +51,19 @@ struct IntermediatePoints {
 extern SDL_Renderer* renderer;
 extern enum OperationMode mode;
 extern struct IntermediatePoints* ip;
+extern struct UserObjectList objects;
+extern bool locked;
 
 void renderCursor(float x, float y);
 void setupIP(enum UserObjectType type, int npoints);
 struct UserObject* toUserObject(void);
 void addPoint(float x, float y);
 struct UserObject* drawIntermediateLine(float x, float y);
+struct UserObject* drawIntermediateCircle(float x, float y);
 
 void append(struct UserObjectList* l, struct UserObject* obj);
 void draw(struct UserObject* obj);
 
 void execute(char* str);
+
+bool lock(float* x, float* y);

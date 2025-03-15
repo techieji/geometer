@@ -1,7 +1,8 @@
 #include "geometer.h"
 
 void renderCursor(float x, float y) {
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    if (locked) SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    else SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderLine(renderer, x, y + 3, x, y - 3);
     SDL_RenderLine(renderer, x + 3, y, x - 3, y);
     SDL_RenderLine(renderer, x, y - 8, x, y - 14);
@@ -35,12 +36,28 @@ void addPoint(float x, float y) {
 
 struct UserObject* drawIntermediateLine(float x, float y) {
     switch (ip->filled_elems/2) {
-        case 2:
-            return toUserObject();
+        case 2: return toUserObject();
+        case 1: SDL_RenderLine(renderer, ip->arr[0], ip->arr[1], x, y);
+        case 0: return NULL;
+    }
+}
+
+void drawCircle(float r, float x, float y) {
+    for (float t = 0; t < 2*M_PI; t += 0.001)
+        SDL_RenderPoint(renderer, r*cos(t) + x, r*sin(t) + y);
+ }
+
+struct UserObject* drawIntermediateCircle(float x, float y) {
+    switch (ip->filled_elems/2) {
+        case 2: return toUserObject();
         case 1:
-            SDL_RenderLine(renderer, ip->arr[0], ip->arr[1], x, y);
-        case 0:
-            return NULL;
+            // Draw X on center
+            SDL_RenderLine(renderer, ip->arr[0]-3, ip->arr[1]-3, ip->arr[0]+3, ip->arr[1]+3);
+            SDL_RenderLine(renderer, ip->arr[0]-3, ip->arr[1]+3, ip->arr[0]+3, ip->arr[1]-3);
+            // Draw circle
+            float r = sqrtf(pow(ip->arr[0] - x, 2) + pow(ip->arr[1] - y, 2));
+            drawCircle(r, ip->arr[0], ip->arr[1]);
+        case 0: return NULL;
     }
 }
 
@@ -62,6 +79,9 @@ void draw(struct UserObject* obj) {
         case OBJ_LINE:
             SDL_RenderLine(renderer, obj->p1x, obj->p1y, obj->p2x, obj->p2y);
             return;
+        case OBJ_CIRCLE:
+            float r = sqrtf(pow(obj->p1x - obj->p2x, 2) + pow(obj->p1y - obj->p2y, 2));
+            drawCircle(r, obj->p1x, obj->p1y);
+            return;
     }
 }
-
