@@ -61,6 +61,20 @@ struct UserObject* drawIntermediateCircle(float x, float y) {
     }
 }
 
+struct UserObject* drawIntermediateText(float x, float y) {
+    switch (ip->filled_elems/2) {
+        case 1:
+            struct UserObject* obj = toUserObject();
+            obj->text = malloc(256 * sizeof(char));
+            memcpy(obj->text, buffer, sizeof(buffer));
+            memset(buffer, '\0', sizeof(buffer));
+            return obj;
+        case 0:
+            SDL_RenderDebugText(renderer, x, y, buffer);
+            return NULL;
+    }
+}
+
 void append(struct UserObjectList* l, struct UserObject* obj) {
     if (l->head == NULL) {
         l->head = l->tail = malloc(sizeof(struct UserObjectSeq));
@@ -82,6 +96,9 @@ void draw(struct UserObject* obj) {
         case OBJ_CIRCLE:
             float r = sqrtf(pow(obj->p1x - obj->p2x, 2) + pow(obj->p1y - obj->p2y, 2));
             drawCircle(r, obj->p1x, obj->p1y);
+            return;
+        case OBJ_TEXT:
+            SDL_RenderDebugText(renderer, obj->p1x, obj->p1y, obj->text);
             return;
     }
 }

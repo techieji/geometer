@@ -25,9 +25,18 @@ void lockLine(struct UserObject* item, float* x, float *y) {
         *x = px;
         *y = py;
     }
- }
+}
 
-bool lock(float* x, float* y) {
+void lockCircle(struct UserObject* item, float* x, float* y) {
+    float d = sqrtf(pow(*x - item->p1x, 2) + pow(*y - item->p1y, 2));   // TODO: avoid recomputing everytime (add field)
+    float r = sqrtf(pow(item->p2x - item->p1x, 2) + pow(item->p2y - item->p1y, 2));
+    if (abs(d - r) < RADIUS) {
+        *x = r / d * (*x - item->p1x) + item->p1x;
+        *y = r / d * (*y - item->p1y) + item->p1y;
+    }
+}
+
+bool _lock(float* x, float* y) {
     float originalx = *x, originaly = *y;
     for (struct UserObjectSeq* seq = objects.head; seq != NULL; seq = seq->next) {
         struct UserObject* item = seq->here;
@@ -36,8 +45,8 @@ bool lock(float* x, float* y) {
         if ((*x != originalx) || (*y != originaly)) continue;
         // Element specific locking
         switch (item->type) {
-            case OBJ_LINE:
-                lockLine(item, x, y);
+            case OBJ_LINE: lockLine(item, x, y); break;
+            case OBJ_CIRCLE: lockCircle(item, x, y); break;
        }
         if ((*x != originalx) || (*y != originaly)) continue;
     }
@@ -48,4 +57,11 @@ bool lock(float* x, float* y) {
     }
 
     return (*x != originalx) || (*y != originaly);
+}
+
+bool lock(float* x, float* y) {
+    // There has to be a better way of implementing intersection locking...
+    bool res = false;
+    for (int i = 0; i < 10; i++) res = res | _lock(x, y);
+    return res;
 }

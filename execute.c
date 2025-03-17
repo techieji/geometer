@@ -9,5 +9,8 @@ void execute(char* str) {
     } else if (strcmp(str, ":circle") == 0) {
         mode = MO_CIRCLE;
         setupIP(OBJ_CIRCLE, 2);
+    } else if (strcmp(str, ":text") == 0) {
+        mode = MO_TEXT;
+        setupIP(OBJ_TEXT, 1);
     }
 }

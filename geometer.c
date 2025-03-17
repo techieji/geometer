@@ -19,19 +19,22 @@ bool mainloop(void) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_GetMouseState(&x, &y);
     locked = lock(&x, &y);
-    renderCursor(x, y);
     // TODO: rewrite corner_display as a more intelligent function (newline handling)
+    // TODO: Move function to end of code (render on top)
 #define CORNER_DISPLAY(x) SDL_RenderDebugText(renderer, 7, HEIGHT - 15, x)
-    if (strlen(buffer) == 0) {
-        switch (mode) {
-            case MO_LINE:
-                CORNER_DISPLAY("-- LINE --");
-                break;
-            case MO_CIRCLE:
-                CORNER_DISPLAY("-- CIRCLE -- ");
-                break;
-        }
-    } else CORNER_DISPLAY(buffer);
+    switch (mode) {
+        case MO_LINE:
+            CORNER_DISPLAY("-- LINE --");
+            break;
+        case MO_CIRCLE:
+            CORNER_DISPLAY("-- CIRCLE --");
+            break;
+        case MO_TEXT:
+            CORNER_DISPLAY("-- TEXT --");
+            break;
+        default:
+            CORNER_DISPLAY(buffer);
+    }
 
     // Poll events
     SDL_Event e;
@@ -59,7 +62,8 @@ bool mainloop(void) {
                 break;
             case SDL_EVENT_TEXT_INPUT:   // Place keys into command buffer
                 if (e.text.text[0] == ':') mode = MO_COMMAND;
-                if (mode == MO_COMMAND) cursor = SDL_strlcat(buffer, e.text.text, sizeof(buffer));
+                if (mode == MO_COMMAND || mode == MO_TEXT)
+                    cursor = SDL_strlcat(buffer, e.text.text, sizeof(buffer));
                 break;
             case SDL_EVENT_MOUSE_BUTTON_DOWN:
                 if (ip != NULL) addPoint(x, y);
@@ -67,7 +71,7 @@ bool mainloop(void) {
         }
     }
 
-    // TODO: Render user data
+    // Render user data
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     for (struct UserObjectSeq* item = objects.head; item != NULL; item = item->next)
         draw(item->here);
@@ -80,8 +84,13 @@ bool mainloop(void) {
         case MO_CIRCLE:
             if ((obj = drawIntermediateCircle(x, y)) != NULL) append(&objects, obj);
             break;
+        case MO_TEXT:
+            if ((obj = drawIntermediateText(x, y)) != NULL) append(&objects, obj);
+            break;
     }
- 
+
+    // Render mouse 
+    renderCursor(x, y);
     // Display data and wait
     SDL_RenderPresent(renderer);
     SDL_Delay(10);
