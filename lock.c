@@ -51,7 +51,7 @@ bool _lock(float* x, float* y) {
         if ((*x != originalx) || (*y != originaly)) continue;
     }
     // Horizontal/Vertical Locking
-    if (mode == MO_LINE && ip->filled_elems >= 2) {
+    if (mode == OBJ_LINE && ip->filled_elems >= 2) {
         if (abs(*x - ip->arr[0]) < RADIUS) *x = ip->arr[0];
         if (abs(*y - ip->arr[1]) < RADIUS) *y = ip->arr[1];
     }

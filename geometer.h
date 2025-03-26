@@ -15,14 +15,13 @@
 enum OperationMode {
     MO_NORMAL,    // No default actions (TODO: add navigation)
     MO_COMMAND,   // Enters data into command buffer
-    MO_LINE,      // Draws a line
-    MO_CIRCLE,    // Draws a circle
-    MO_TEXT       // Writes text at a point
+    // IMPORTANT NOTE: this also takes values that correspond to UserObjectTypes, for the
+    // creation aspect of them
 };
 
 struct UserObject {
     enum UserObjectType {
-        OBJ_POINT,
+        OBJ_POINT = 100,
         OBJ_LINE,
         OBJ_CIRCLE,
         OBJ_BEZIER,
@@ -52,6 +51,15 @@ struct IntermediatePoints {
     float* arr;   // Alternating xs and ys
 };
 
+struct ObjectType {
+    enum UserObjectType type;
+    char* name;
+    struct UserObject* (*intermediate)(float x, float y);
+    void (*draw)(struct UserObject* obj);
+};
+
+extern const struct ObjectType types[];
+
 extern SDL_Renderer* renderer;
 extern enum OperationMode mode;
 extern struct IntermediatePoints* ip;
@@ -66,9 +74,10 @@ void renderCursor(float x, float y);
 void setupIP(enum UserObjectType type, int npoints);
 struct UserObject* toUserObject(void);
 void addPoint(float x, float y);
-struct UserObject* drawIntermediateLine(float x, float y);
-struct UserObject* drawIntermediateCircle(float x, float y);
-struct UserObject* drawIntermediateText(float x, float y);
+//struct UserObject* drawIntermediateLine(float x, float y);
+//struct UserObject* drawIntermediateCircle(float x, float y);
+//struct UserObject* drawIntermediateText(float x, float y);
+struct UserObject* drawIntermediate(enum UserObjectType type, float x, float y);
 void append(struct UserObjectList* l, struct UserObject* obj);
 void draw(struct UserObject* obj);
 
@@ -77,3 +86,6 @@ void execute(char* str);
 
 // lock.c
 bool lock(float* x, float* y);
+
+// persist.c
+void generate(char* filename);

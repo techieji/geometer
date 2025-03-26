@@ -23,19 +23,20 @@ bool mainloop(void) {
     // TODO: Move function to end of code (render on top)
 #define CORNER_DISPLAY(x) SDL_RenderDebugText(renderer, 7, HEIGHT - 15, x)
     switch (mode) {
-        case MO_LINE:
+        case OBJ_LINE:
             CORNER_DISPLAY("-- LINE --");
             break;
-        case MO_CIRCLE:
+        case OBJ_CIRCLE:
             CORNER_DISPLAY("-- CIRCLE --");
             break;
-        case MO_TEXT:
+        case OBJ_TEXT:
             CORNER_DISPLAY("-- TEXT --");
             break;
         default:
             CORNER_DISPLAY(buffer);
     }
 
+    // TODO: separate into another function
     // Poll events
     SDL_Event e;
     while (SDL_PollEvent(&e)) {
@@ -62,7 +63,7 @@ bool mainloop(void) {
                 break;
             case SDL_EVENT_TEXT_INPUT:   // Place keys into command buffer
                 if (e.text.text[0] == ':') mode = MO_COMMAND;
-                if (mode == MO_COMMAND || mode == MO_TEXT)
+                if (mode == MO_COMMAND || mode == OBJ_TEXT)
                     cursor = SDL_strlcat(buffer, e.text.text, sizeof(buffer));
                 break;
             case SDL_EVENT_MOUSE_BUTTON_DOWN:
@@ -73,21 +74,22 @@ bool mainloop(void) {
 
     // Render user data
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    for (struct UserObjectSeq* item = objects.head; item != NULL; item = item->next)
-        draw(item->here);
+    for (struct UserObjectSeq* item = objects.head; item != NULL; item = item->next) draw(item->here);
 
-    struct UserObject* obj;
+    struct UserObject* obj = drawIntermediate(mode, x, y);
+    if (obj != NULL) append(&objects, obj);
+    /*
     switch (mode) {
-        case MO_LINE:
+        case OBJ_LINE:
             if ((obj = drawIntermediateLine(x, y)) != NULL) append(&objects, obj);
             break;
-        case MO_CIRCLE:
+        case OBJ_CIRCLE:
             if ((obj = drawIntermediateCircle(x, y)) != NULL) append(&objects, obj);
             break;
-        case MO_TEXT:
+        case OBJ_TEXT:
             if ((obj = drawIntermediateText(x, y)) != NULL) append(&objects, obj);
             break;
-    }
+    }*/
 
     // Render mouse 
     renderCursor(x, y);
