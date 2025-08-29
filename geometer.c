@@ -78,18 +78,6 @@ bool mainloop(void) {
 
     struct UserObject* obj = drawIntermediate(mode, x, y);
     if (obj != NULL) append(&objects, obj);
-    /*
-    switch (mode) {
-        case OBJ_LINE:
-            if ((obj = drawIntermediateLine(x, y)) != NULL) append(&objects, obj);
-            break;
-        case OBJ_CIRCLE:
-            if ((obj = drawIntermediateCircle(x, y)) != NULL) append(&objects, obj);
-            break;
-        case OBJ_TEXT:
-            if ((obj = drawIntermediateText(x, y)) != NULL) append(&objects, obj);
-            break;
-    }*/
 
     // Render mouse 
     renderCursor(x, y);

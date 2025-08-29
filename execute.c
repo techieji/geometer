@@ -16,7 +16,7 @@ void execute(char* str) {
     } else if (strcmp(str, ":text") == 0) {
         mode = OBJ_TEXT;
         setupIP(OBJ_TEXT, 1);
-    } else if (startsWith(str, ":persist")) {
+    } else if (startsWith(str, ":w")) {
         generate("file.tex");
     }
 }

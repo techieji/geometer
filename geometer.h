@@ -1,3 +1,4 @@
+#pragma once
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
@@ -32,6 +33,12 @@ struct UserObject {
     };
     // DO NOT TOUCH CODE BEFORE HERE, some code relies on the struct layout
     char* text; // Used for OBJ_TEXT
+    enum Color {
+        COLOR_BLACK,
+        COLOR_TRANS,
+        COLOR_RED,
+        COLOR_BLUE
+    } color;
 };
 
 struct UserObjectSeq {
@@ -56,6 +63,7 @@ struct ObjectType {
     char* name;
     struct UserObject* (*intermediate)(float x, float y);
     void (*draw)(struct UserObject* obj);
+    void (*persist)(struct UserObject* obj, FILE* file);
 };
 
 extern const struct ObjectType types[];
@@ -74,9 +82,6 @@ void renderCursor(float x, float y);
 void setupIP(enum UserObjectType type, int npoints);
 struct UserObject* toUserObject(void);
 void addPoint(float x, float y);
-//struct UserObject* drawIntermediateLine(float x, float y);
-//struct UserObject* drawIntermediateCircle(float x, float y);
-//struct UserObject* drawIntermediateText(float x, float y);
 struct UserObject* drawIntermediate(enum UserObjectType type, float x, float y);
 void append(struct UserObjectList* l, struct UserObject* obj);
 void draw(struct UserObject* obj);

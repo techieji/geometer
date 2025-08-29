@@ -22,6 +22,8 @@ void setupIP(enum UserObjectType type, int npoints) {
 struct UserObject* toUserObject(void) {
     struct UserObject* obj = malloc(sizeof(struct UserObject));
     obj->type = ip->type;
+    // This part relies on the memory layout of UserObject
+    // Copy the array after skipping the type element
     memcpy((void*)obj + sizeof(enum UserObjectType), ip->arr, ip->size * sizeof(float));
     ip->filled_elems = 0;
     free(ip->arr);
@@ -46,27 +48,60 @@ void drawLine(struct UserObject* obj) {
     SDL_RenderLine(renderer, obj->p1x, obj->p1y, obj->p2x, obj->p2y);
 }
 
-void renderCircle(float r, float x, float y) {
-    for (float t = 0; t < 2*M_PI; t += 0.001)
-        SDL_RenderPoint(renderer, r*cos(t) + x, r*sin(t) + y);
+void persistLine(struct UserObject* obj, FILE* file) {
+    fprintf(file, "\\draw[] (%fpt, %fpt) -- (%fpt, %fpt);\n",
+            obj->p1x, obj->p1y, obj->p2x, obj->p2y);
 }
 
-void drawCircle(struct UserObject* obj) {    // TODO: move below intermediate circle fn
-    float r = sqrtf(pow(obj->p1x - obj->p2x, 2) + pow(obj->p1y - obj->p2y, 2));
-    renderCircle(r, obj->p1x, obj->p1y);
+void renderArc(float r, float x, float y, float start_angle, float end_angle) {
+    for (float t = start_angle; t < end_angle; t += 0.001)
+        SDL_RenderPoint(renderer, r*cos(t) + x, r*sin(t) + y);
 }
 
 struct UserObject* drawIntermediateCircle(float x, float y) {
     switch (ip->filled_elems/2) {
         case 2: return toUserObject();
         case 1:
-            // Draw X on center
+            // Draw X on center  (TODO factor out as render point)
             SDL_RenderLine(renderer, ip->arr[0]-3, ip->arr[1]-3, ip->arr[0]+3, ip->arr[1]+3);
             SDL_RenderLine(renderer, ip->arr[0]-3, ip->arr[1]+3, ip->arr[0]+3, ip->arr[1]-3);
             // Draw circle
             float r = sqrtf(pow(ip->arr[0] - x, 2) + pow(ip->arr[1] - y, 2));
-            renderCircle(r, ip->arr[0], ip->arr[1]);
+            renderArc(r, ip->arr[0], ip->arr[1], 0, 2*M_PI);
         case 0: return NULL;
+    }
+}
+
+void drawCircle(struct UserObject* obj) {
+    float r = sqrtf(pow(obj->p1x - obj->p2x, 2) + pow(obj->p1y - obj->p2y, 2));
+    renderArc(r, obj->p1x, obj->p1y, 0, 2*M_PI);
+}
+
+void persistCircle(struct UserObject* obj, FILE* file) {
+    float r = sqrtf(pow(obj->p1x - obj->p2x, 2) + pow(obj->p1y - obj->p2y, 2));
+    fprintf(file, "\\draw[] (%fpt, %fpt) circle (%fpt);\n", obj->p1x, obj->p1y, r);
+}
+
+struct UserObject* drawIntermediateArc(float x, float y) {
+    switch (ip->filled_elems/2) {
+        case 3: return toUserObject();
+        case 2:
+            // Draw X on center (TODO factor out)
+            SDL_RenderLine(renderer, ip->arr[0]-3, ip->arr[1]-3, ip->arr[0]+3, ip->arr[1]+3);
+            SDL_RenderLine(renderer, ip->arr[0]-3, ip->arr[1]+3, ip->arr[0]+3, ip->arr[1]-3);
+            // Calculate angles
+            float ax = ip->arr[2] - ip->arr[0], ay = ip->arr[3] - ip->arr[1],
+                  bx = x - ip->arr[0], by = y - ip->arr[1];
+            float start_angle = acosf((ax)/sqrtf(ax*ax + ay*ay));
+            float end_angle = acosf((bx)/sqrtf(bx*bx + by*by));
+            // Draw circle
+            float r = sqrtf(ax*ax + ay*ay);
+            renderArc(r, ip->arr[0], ip->arr[1], start_angle, end_angle);
+            // TODO draw (dotted) line
+            return NULL;
+        case 1:
+        case 0:
+            return drawIntermediateCircle(x, y);
     }
 }
 
@@ -88,6 +123,11 @@ void drawText(struct UserObject* obj) {
     SDL_RenderDebugText(renderer, obj->p1x, obj->p1y, obj->text);
 }
 
+void persistText(struct UserObject* obj, FILE* file) {
+    fprintf(file, "\\node[anchor=northwest] at (%fpt, %fpt) {%s};\n",
+            obj->p1x, obj->p1y, obj->text);
+}
+
 void append(struct UserObjectList* l, struct UserObject* obj) {
     if (l->head == NULL) {
         l->head = l->tail = malloc(sizeof(struct UserObjectSeq));
@@ -102,10 +142,10 @@ void append(struct UserObjectList* l, struct UserObject* obj) {
 }
 
 const struct ObjectType types[] = {
-    { OBJ_LINE, "-- LINE --", drawIntermediateLine, drawLine },
-    { OBJ_CIRCLE, "-- CIRCLE --", drawIntermediateCircle, drawCircle },
-    { OBJ_TEXT, "-- TEXT --", drawIntermediateText, drawText },
-    { -100, NULL, NULL, NULL }
+    { OBJ_LINE, "-- LINE --", drawIntermediateLine, drawLine, persistLine },
+    { OBJ_CIRCLE, "-- CIRCLE --", drawIntermediateCircle, drawCircle, persistCircle },
+    { OBJ_TEXT, "-- TEXT --", drawIntermediateText, drawText, persistText },
+    { -100, NULL, NULL, NULL, NULL }       // Sentinel value?
 };
 
 struct UserObject* drawIntermediate(enum UserObjectType type, float x, float y) {
@@ -119,4 +159,17 @@ void draw(struct UserObject* obj) {
     for (int i = 0; i < sizeof(types); i++)
         if (types[i].type == obj->type)
             return types[i].draw(obj);
+}
+
+void persist(struct UserObject* obj, FILE* file) {
+    for (int i = 0; i < sizeof(types); i++)
+        if (types[i].type == obj->type)
+            return types[i].persist(obj, file);
+}
+
+void generate(char* filename) {
+    FILE* file = fopen(filename, "w");
+    for (struct UserObjectSeq* item = objects.head; item != NULL; item = item->next)
+        persist(item->here, file);
+    fclose(file);
 }

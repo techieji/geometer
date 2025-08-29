@@ -1,3 +1,5 @@
 #!/bin/bash
 
-(gcc geometer.c render_tools.c execute.c lock.c persist.c -lSDL3 -lm -g) && ./a.out
+set -e
+gcc geometer.c render_tools.c execute.c lock.c persist.c -lSDL3 -lm -g -Wall
+./a.out
