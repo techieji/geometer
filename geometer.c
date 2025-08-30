@@ -7,6 +7,7 @@ char buffer[256];
 uint8_t cursor = 0;
 enum OperationMode mode = MO_NORMAL;
 bool locked = false;
+struct UserObject* locked_on = NULL;     // not necessarily defined with locked is true
 
 struct IntermediatePoints* ip = NULL;
 struct UserObjectList objects = { NULL, NULL };
@@ -31,6 +32,9 @@ bool mainloop(void) {
             break;
         case OBJ_TEXT:
             CORNER_DISPLAY("-- TEXT --");
+            break;
+        case MO_DELETE:
+            CORNER_DISPLAY("-- DELETE --");
             break;
         default:
             CORNER_DISPLAY(buffer);
@@ -68,13 +72,14 @@ bool mainloop(void) {
                 break;
             case SDL_EVENT_MOUSE_BUTTON_DOWN:
                 if (ip != NULL) addPoint(x, y);
+                if (mode == MO_DELETE && locked_on != NULL) remove_obj(&objects, locked_on);
                 break;
         }
     }
 
     // Render user data
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    for (struct UserObjectSeq* item = objects.head; item != NULL; item = item->next) draw(item->here);
+    for (struct UserObjectSeq* item = objects.head; item != NULL; item = item->next)
+        draw(item->here);
 
     struct UserObject* obj = drawIntermediate(mode, x, y);
     if (obj != NULL) append(&objects, obj);

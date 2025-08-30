@@ -42,6 +42,7 @@ struct UserObject* drawIntermediateLine(float x, float y) {
         case 1: SDL_RenderLine(renderer, ip->arr[0], ip->arr[1], x, y);
         case 0: return NULL;
     }
+    __builtin_unreachable();
 }
 
 void drawLine(struct UserObject* obj) {
@@ -70,6 +71,7 @@ struct UserObject* drawIntermediateCircle(float x, float y) {
             renderArc(r, ip->arr[0], ip->arr[1], 0, 2*M_PI);
         case 0: return NULL;
     }
+    __builtin_unreachable();
 }
 
 void drawCircle(struct UserObject* obj) {
@@ -103,9 +105,12 @@ struct UserObject* drawIntermediateArc(float x, float y) {
         case 0:
             return drawIntermediateCircle(x, y);
     }
+    __builtin_unreachable();
 }
 
-struct UserObject* drawIntermediateText(float x, float y) {
+// TODO finish arc
+
+struct UserObject* drawIntermediateText(float x, float y) {  // Stupid and unintuitive interface FIXME
     switch (ip->filled_elems/2) {
         case 1:
             struct UserObject* obj = toUserObject();
@@ -117,6 +122,7 @@ struct UserObject* drawIntermediateText(float x, float y) {
             SDL_RenderDebugText(renderer, x, y, buffer);
             return NULL;
     }
+    __builtin_unreachable();
 }
 
 void drawText(struct UserObject* obj) {
@@ -141,6 +147,20 @@ void append(struct UserObjectList* l, struct UserObject* obj) {
     }
 }
 
+void remove_obj(struct UserObjectList* l, struct UserObject* obj) {    // Never thought I'd have to implement LL methods...
+    struct UserObjectSeq* prev = NULL;
+    for (struct UserObjectSeq* seq = l->head; seq != NULL; seq = seq->next) {
+        if (seq->here == obj) {
+            if (prev == NULL) l->head = seq->next;
+            else prev->next = seq->next;
+            if (seq->next == NULL) l->tail = prev;
+            free(seq->here);
+            free(seq);
+            return;
+        }
+    }
+}
+
 const struct ObjectType types[] = {
     { OBJ_LINE, "-- LINE --", drawIntermediateLine, drawLine, persistLine },
     { OBJ_CIRCLE, "-- CIRCLE --", drawIntermediateCircle, drawCircle, persistCircle },
@@ -153,9 +173,15 @@ struct UserObject* drawIntermediate(enum UserObjectType type, float x, float y) 
         if (types[i].name == NULL) return NULL;
         if (types[i].type == type) return types[i].intermediate(x, y);
     }
+    __builtin_unreachable();     // Maybe add a check here for weird types? For that matter:
+                                 // TODO: better error handling
 }
 
 void draw(struct UserObject* obj) {
+    if (obj == locked_on && mode == MO_DELETE)
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    else
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     for (int i = 0; i < sizeof(types); i++)
         if (types[i].type == obj->type)
             return types[i].draw(obj);

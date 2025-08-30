@@ -16,16 +16,17 @@
 enum OperationMode {
     MO_NORMAL,    // No default actions (TODO: add navigation)
     MO_COMMAND,   // Enters data into command buffer
-    // IMPORTANT NOTE: this also takes values that correspond to UserObjectTypes, for the
-    // creation aspect of them
+    MO_DELETE,    // Allows you to delete objects (TODO: implement)
+    // IMPORTANT NOTE: this also takes values that correspond to UserObjectTypes,
+    // for the mode associated with creating them
 };
 
 struct UserObject {
     enum UserObjectType {
-        OBJ_POINT = 100,
-        OBJ_LINE,
+        OBJ_LINE = 100,    // This is 100 because it can be an OperationMode as well!
         OBJ_CIRCLE,
-        OBJ_BEZIER,
+        //OBJ_BEZIER,
+        //OBJ_POINT,
         OBJ_TEXT
     } type;
     struct {
@@ -73,6 +74,7 @@ extern enum OperationMode mode;
 extern struct IntermediatePoints* ip;
 extern struct UserObjectList objects;
 extern bool locked;
+extern struct UserObject* locked_on;
 extern char buffer[256];
 
 /* External API of utility files */
@@ -84,6 +86,7 @@ struct UserObject* toUserObject(void);
 void addPoint(float x, float y);
 struct UserObject* drawIntermediate(enum UserObjectType type, float x, float y);
 void append(struct UserObjectList* l, struct UserObject* obj);
+void remove_obj(struct UserObjectList* l, struct UserObject* obj);   // rename? minor fix
 void draw(struct UserObject* obj);
 
 // execute.c

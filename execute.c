@@ -1,9 +1,12 @@
 #include "geometer.h"
 
+// Util functions
+
 bool startsWith(char* string, char* prefix) {
     return strncmp(prefix, string, strlen(prefix)) == 0;
 }
 
+// TODO replace this with an actual language
 void execute(char* str) {
     if (strcmp(str, ":line") == 0) {
         mode = OBJ_LINE;
@@ -17,6 +20,8 @@ void execute(char* str) {
         mode = OBJ_TEXT;
         setupIP(OBJ_TEXT, 1);
     } else if (startsWith(str, ":w")) {
-        generate("file.tex");
+        generate("file.tex");    // TODO make this configurable!
+    } else if (startsWith(str, ":d")) {
+        mode = MO_DELETE;
     }
 }

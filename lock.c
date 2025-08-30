@@ -24,6 +24,7 @@ void lockLine(struct UserObject* item, float* x, float *y) {
     if ((0 < k) && (k < 1) && goodDistance(px, py, *x, *y)) {
         *x = px;
         *y = py;
+        locked_on = item;
     }
 }
 
@@ -33,6 +34,7 @@ void lockCircle(struct UserObject* item, float* x, float* y) {
     if (abs(d - r) < RADIUS) {
         *x = r / d * (*x - item->p1x) + item->p1x;
         *y = r / d * (*y - item->p1y) + item->p1y;
+        locked_on = item;
     }
 }
 
@@ -42,13 +44,17 @@ bool _lock(float* x, float* y) {
         struct UserObject* item = seq->here;
         // Point check
         lockPoint(item, x, y);
-        if ((*x != originalx) || (*y != originaly)) continue;
+        if ((*x != originalx) || (*y != originaly)) {
+            locked_on = item;
+            continue;
+        }
         // Element specific locking
+        // Each element locking procedure has to set locked_on
         switch (item->type) {
             case OBJ_LINE: lockLine(item, x, y); break;
             case OBJ_CIRCLE: lockCircle(item, x, y); break;
-       }
-        if ((*x != originalx) || (*y != originaly)) continue;
+        }
+        if ((*x != originalx) || (*y != originaly)) continue; // idk why this is still there?
     }
     // Horizontal/Vertical Locking
     if (mode == OBJ_LINE && ip->filled_elems >= 2) {
@@ -62,6 +68,7 @@ bool _lock(float* x, float* y) {
 bool lock(float* x, float* y) {
     // There has to be a better way of implementing intersection locking...
     bool res = false;
+    locked_on = NULL;
     for (int i = 0; i < 10; i++) res = res | _lock(x, y);
     return res;
 }
