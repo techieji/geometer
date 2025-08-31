@@ -25,9 +25,9 @@ struct UserObject {
     enum UserObjectType {
         OBJ_LINE = 100,    // This is 100 because it can be an OperationMode as well!
         OBJ_CIRCLE,
-        //OBJ_BEZIER,
+        OBJ_TEXT,
+        OBJ_BEZIER
         //OBJ_POINT,
-        OBJ_TEXT
     } type;
     struct {
         float p1x, p1y, p2x, p2y, p3x, p3y, p4x, p4y;

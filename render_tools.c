@@ -108,7 +108,7 @@ struct UserObject* drawIntermediateArc(float x, float y) {
     __builtin_unreachable();
 }
 
-// TODO finish arc
+// TODO finish arc! everything (except persist is already there!)
 
 struct UserObject* drawIntermediateText(float x, float y) {  // Stupid and unintuitive interface FIXME
     switch (ip->filled_elems/2) {
@@ -132,6 +132,56 @@ void drawText(struct UserObject* obj) {
 void persistText(struct UserObject* obj, FILE* file) {
     fprintf(file, "\\node[anchor=northwest] at (%fpt, %fpt) {%s};\n",
             obj->p1x, obj->p1y, obj->text);
+}
+
+// TODO write bezier
+
+#define BEZIER_RESOLUTION 100
+void bezierFunction(float* pi) {
+    // pi is a list of p1x, p1y, p2x, p2y...
+    // Look at the point order in the following function
+    SDL_FPoint arr[BEZIER_RESOLUTION];
+    for (int n = 0; n < BEZIER_RESOLUTION; n++) {
+        float t = (float)n/BEZIER_RESOLUTION;
+        arr[n].x = t*t*t * pi[0] + 3 * t*t*(1-t) * pi[2] + 3 * t*(1-t)*(1-t) * (2*pi[4] - pi[6]) + (1-t)*(1-t)*(1-t) * pi[4];
+        arr[n].y = t*t*t * pi[1] + 3 * t*t*(1-t) * pi[3] + 3 * t*(1-t)*(1-t) * (2*pi[5] - pi[7]) + (1-t)*(1-t)*(1-t) * pi[5];
+    }
+    SDL_RenderLines(renderer, arr, BEZIER_RESOLUTION);
+}
+
+struct UserObject* drawIntermediateBezier(float x, float y) {
+    // point order: p1, c1, p2, c2
+    switch (ip->filled_elems/2) {
+        case 4:
+            // TODO also set a new IP so it can continue!
+            float temp_arr[4];
+            memcpy(temp_arr, ip->arr + 4, sizeof(float) * 4);
+            struct UserObject* res_obj = toUserObject();
+            //setupIP(OBJ_BEZIER, 4);
+            addPoint(temp_arr[0], temp_arr[1]);
+            addPoint(temp_arr[2], temp_arr[3]);
+            return res_obj;
+        case 2:
+            // Fallthrough, the control and endpoint are the same here
+            ip->arr[ip->filled_elems + 2] = x;
+            ip->arr[ip->filled_elems + 3] = y;
+        case 3:
+            // I swear to god, my code gets more cursed every day...
+            ip->arr[ip->filled_elems] = x;
+            ip->arr[ip->filled_elems + 1] = y;
+            bezierFunction(ip->arr);
+            SDL_RenderLine(renderer, ip->arr[0], ip->arr[1], ip->arr[2], ip->arr[3]);
+            SDL_RenderLine(renderer, ip->arr[4], ip->arr[5], x, y);
+            return NULL;
+        case 1:
+            SDL_RenderLine(renderer, ip->arr[0], ip->arr[1], x, y);
+        case 0:
+            return NULL;
+    }
+}
+
+void drawBezier(struct UserObject* obj) {
+    bezierFunction(&(obj->p1x));    // Should work?
 }
 
 void append(struct UserObjectList* l, struct UserObject* obj) {
@@ -165,6 +215,7 @@ const struct ObjectType types[] = {
     { OBJ_LINE, "-- LINE --", drawIntermediateLine, drawLine, persistLine },
     { OBJ_CIRCLE, "-- CIRCLE --", drawIntermediateCircle, drawCircle, persistCircle },
     { OBJ_TEXT, "-- TEXT --", drawIntermediateText, drawText, persistText },
+    { OBJ_BEZIER, "-- BEZIER -- ", drawIntermediateBezier, drawBezier, NULL },   // FIXME: implement persistBezier
     { -100, NULL, NULL, NULL, NULL }       // Sentinel value?
 };
 
@@ -182,6 +233,7 @@ void draw(struct UserObject* obj) {
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     else
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+
     for (int i = 0; i < sizeof(types); i++)
         if (types[i].type == obj->type)
             return types[i].draw(obj);

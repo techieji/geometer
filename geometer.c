@@ -23,12 +23,16 @@ bool mainloop(void) {
     // TODO: rewrite corner_display as a more intelligent function (newline handling)
     // TODO: Move function to end of code (render on top)
 #define CORNER_DISPLAY(x) SDL_RenderDebugText(renderer, 7, HEIGHT - 15, x)
+    // TODO if (mode > 100) ... finish it
     switch (mode) {
         case OBJ_LINE:
             CORNER_DISPLAY("-- LINE --");
             break;
         case OBJ_CIRCLE:
             CORNER_DISPLAY("-- CIRCLE --");
+            break;
+        case OBJ_BEZIER:
+            CORNER_DISPLAY("-- BEZIER --");
             break;
         case OBJ_TEXT:
             CORNER_DISPLAY("-- TEXT --");

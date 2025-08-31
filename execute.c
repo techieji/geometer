@@ -16,6 +16,9 @@ void execute(char* str) {
     } else if (strcmp(str, ":circle") == 0) {
         mode = OBJ_CIRCLE;
         setupIP(OBJ_CIRCLE, 2);
+    } else if (strcmp(str, ":bezier") == 0) {
+        mode = OBJ_BEZIER;
+        setupIP(OBJ_BEZIER, 4);
     } else if (strcmp(str, ":text") == 0) {
         mode = OBJ_TEXT;
         setupIP(OBJ_TEXT, 1);
