@@ -136,7 +136,7 @@ void persistText(struct UserObject* obj, FILE* file) {
 
 // TODO write bezier
 
-#define BEZIER_RESOLUTION 10
+#define BEZIER_RESOLUTION 100
 void bezierFunction(float* pi) {
     // pi is a list of p1x, p1y, p2x, p2y...
     // Look at the point order in the following function
@@ -208,6 +208,7 @@ void remove_obj(struct UserObjectList* l, struct UserObject* obj) {    // Never 
             free(seq);
             return;
         }
+        prev = seq;
     }
 }
 

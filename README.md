@@ -1,25 +1,28 @@
 # Geometer
 
-Vim-like geometry box for figure generation with LaTeX!
+Vim-like geometry box for fast figure creation with LaTeX!
 
 This grew out of a combination of frustration at Inkscape for not having a simple way to
 do things (or maybe I'm just bad at learning things) for mathematical figure generation,
 and that tools like Geometer's Sketchpad don't have good FOSS equivalents. Although
 this doesn't try to replicate completely either feature-sets, it is pretty usable,
-and planned features should help with that as well.
+and planned features should help with making it more so.
 
 ## Features
 
 - [x] Creating lines, circles, and text
-- [ ] Creating bezier curves and arcs
+- [x] Creating bezier curves
+- [ ] Creating arcs
 - [x] Deleting elements
-- [ ] Saving to a specified file (in progress)
+- [ ] Persistence
+- [x] Saving to a TeX file
 - [ ] Having a relatively complete command language
 
-## Tutorial
+## Usage
 
-Yeah, I'll write this later. The source is... there? if you want to read it
-to understand it?
+I'd advise you to look at `execute.c` which contains, in `execute`, the
+commands that are executed in command mode (after you press `:`), and in
+`shortcut`, the commands that are executed in normal mode.
 
 ## Architecture (for developers = me)
 

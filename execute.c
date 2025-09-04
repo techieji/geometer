@@ -37,7 +37,7 @@ void shortcut(char c) {
             return setupIP(OBJ_LINE, 2);
         case 'c':
             mode = OBJ_CIRCLE;
-            return setupIP(OBJ_LINE, 2);
+            return setupIP(OBJ_CIRCLE, 2);
         case 'b':
             mode = OBJ_BEZIER;
             return setupIP(OBJ_BEZIER, 4);
