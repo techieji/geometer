@@ -55,8 +55,13 @@ void persistLine(struct UserObject* obj, FILE* file) {
 }
 
 void renderArc(float r, float x, float y, float start_angle, float end_angle) {
-    for (float t = start_angle; t < end_angle; t += 0.001)
+#define ARC_RESOLUTION 1000
+    //for (float t = fmod(start_angle, 2*M_PI); t < fmod(end_angle, 2*M_PI); t = fmod(t + 0.001, 2*M_PI))
+    //    SDL_RenderPoint(renderer, r*cos(t) + x, r*sin(t) + y);
+    for (int i = 0; i < ARC_RESOLUTION; i++) {
+        float t = start_angle + i * (end_angle - start_angle)/ARC_RESOLUTION;
         SDL_RenderPoint(renderer, r*cos(t) + x, r*sin(t) + y);
+    }
 }
 
 struct UserObject* drawIntermediateCircle(float x, float y) {
@@ -68,7 +73,7 @@ struct UserObject* drawIntermediateCircle(float x, float y) {
             SDL_RenderLine(renderer, ip->arr[0]-3, ip->arr[1]+3, ip->arr[0]+3, ip->arr[1]-3);
             // Draw circle
             float r = sqrtf(pow(ip->arr[0] - x, 2) + pow(ip->arr[1] - y, 2));
-            renderArc(r, ip->arr[0], ip->arr[1], 0, 2*M_PI);
+            renderArc(r, ip->arr[0], ip->arr[1], 0, 2*M_PI - 0.001);
         case 0: return NULL;
     }
     __builtin_unreachable();
@@ -76,7 +81,7 @@ struct UserObject* drawIntermediateCircle(float x, float y) {
 
 void drawCircle(struct UserObject* obj) {
     float r = sqrtf(pow(obj->p1x - obj->p2x, 2) + pow(obj->p1y - obj->p2y, 2));
-    renderArc(r, obj->p1x, obj->p1y, 0, 2*M_PI);
+    renderArc(r, obj->p1x, obj->p1y, 0, 2*M_PI - 0.001);
 }
 
 void persistCircle(struct UserObject* obj, FILE* file) {
@@ -94,8 +99,8 @@ struct UserObject* drawIntermediateArc(float x, float y) {
             // Calculate angles
             float ax = ip->arr[2] - ip->arr[0], ay = ip->arr[3] - ip->arr[1],
                   bx = x - ip->arr[0], by = y - ip->arr[1];
-            float start_angle = acosf((ax)/sqrtf(ax*ax + ay*ay));
-            float end_angle = acosf((bx)/sqrtf(bx*bx + by*by));
+            float start_angle = atan2f(ay, ax);
+            float end_angle = atan2f(by, bx);
             // Draw circle
             float r = sqrtf(ax*ax + ay*ay);
             renderArc(r, ip->arr[0], ip->arr[1], start_angle, end_angle);
@@ -106,6 +111,16 @@ struct UserObject* drawIntermediateArc(float x, float y) {
             return drawIntermediateCircle(x, y);
     }
     __builtin_unreachable();
+}
+
+void drawArc(struct UserObject* obj) {
+    float ax = obj->p2x - obj->p1x, ay = obj->p2y - obj->p1y,
+          bx = obj->p3x - obj->p1x, by = obj->p3y - obj->p1y;
+    float start_angle = atan2f(ay, ax);
+    float end_angle = atan2f(by, bx);
+    // Draw circle
+    float r = sqrtf(ax*ax + ay*ay);
+    renderArc(r, obj->p1x, obj->p1y, start_angle, end_angle);
 }
 
 // TODO finish arc! everything (except persist is already there!)
@@ -216,7 +231,8 @@ const struct ObjectType types[] = {
     { OBJ_LINE, "-- LINE --", drawIntermediateLine, drawLine, persistLine },
     { OBJ_CIRCLE, "-- CIRCLE --", drawIntermediateCircle, drawCircle, persistCircle },
     { OBJ_TEXT, "-- TEXT --", drawIntermediateText, drawText, persistText },
-    { OBJ_BEZIER, "-- BEZIER -- ", drawIntermediateBezier, drawBezier, NULL },   // FIXME: implement persistBezier
+    { OBJ_BEZIER, "-- BEZIER --", drawIntermediateBezier, drawBezier, NULL },   // FIXME: implement persistBezier
+    { OBJ_ARC, "-- ARC --", drawIntermediateArc, drawArc, NULL },
     { -100, NULL, NULL, NULL, NULL }       // Sentinel value?
 };
 

@@ -22,6 +22,9 @@ void execute(char* str) {
     } else if (strcmp(str, ":text") == 0) {
         mode = OBJ_TEXT;
         setupIP(OBJ_TEXT, 1);
+    } else if (strcmp(str, ":arc") == 0) {
+        mode = OBJ_ARC;
+        setupIP(OBJ_ARC, 3);
     } else if (startsWith(str, ":w")) {
         generate("file.tex");    // TODO make this configurable!
     } else if (startsWith(str, ":d")) {
@@ -33,17 +36,15 @@ void execute(char* str) {
 void shortcut(char c) {
     switch (c) {
         case 'l':
-            mode = OBJ_LINE;
-            return setupIP(OBJ_LINE, 2);
+            return execute(":line");
         case 'c':
-            mode = OBJ_CIRCLE;
-            return setupIP(OBJ_CIRCLE, 2);
+            return execute(":circle");
         case 'b':
-            mode = OBJ_BEZIER;
-            return setupIP(OBJ_BEZIER, 4);
+            return execute(":bezier");
         case 't':
-            mode = OBJ_TEXT;
-            return setupIP(OBJ_TEXT, 1);
+            return execute(":text");
+        case 'a':
+            return execute(":arc");
         case 'd':
             mode = MO_DELETE;
             return;

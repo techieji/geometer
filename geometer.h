@@ -26,7 +26,8 @@ struct UserObject {
         OBJ_LINE = 100,    // This is 100 because it can be an OperationMode as well!
         OBJ_CIRCLE,
         OBJ_TEXT,
-        OBJ_BEZIER
+        OBJ_BEZIER,
+        OBJ_ARC
         //OBJ_POINT,
     } type;
     struct {

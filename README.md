@@ -12,10 +12,11 @@ and planned features should help with making it more so.
 
 - [x] Creating lines, circles, and text
 - [x] Creating bezier curves
-- [ ] Creating arcs
+- [x] Creating arcs
 - [x] Deleting elements
+- [ ] Editing elements (need to implement a node system)
 - [ ] Persistence
-- [x] Saving to a TeX file
+- [ ] Saving to a TeX file
 - [ ] Having a relatively complete command language
 
 ## Usage
