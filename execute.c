@@ -28,3 +28,24 @@ void execute(char* str) {
         mode = MO_DELETE;
     }
 }
+
+// combine into function above
+void shortcut(char c) {
+    switch (c) {
+        case 'l':
+            mode = OBJ_LINE;
+            return setupIP(OBJ_LINE, 2);
+        case 'c':
+            mode = OBJ_CIRCLE;
+            return setupIP(OBJ_LINE, 2);
+        case 'b':
+            mode = OBJ_BEZIER;
+            return setupIP(OBJ_BEZIER, 4);
+        case 't':
+            mode = OBJ_TEXT;
+            return setupIP(OBJ_TEXT, 1);
+        case 'd':
+            mode = MO_DELETE;
+            return;
+    }
+}

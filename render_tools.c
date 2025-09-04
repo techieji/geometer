@@ -16,7 +16,7 @@ void setupIP(enum UserObjectType type, int npoints) {
     ip->type = type;
     ip->size = 2 * npoints;
     ip->filled_elems = 0;
-    ip->arr = malloc(sizeof(float));
+    ip->arr = malloc(sizeof(float) * ip->size);
 }
 
 struct UserObject* toUserObject(void) {
@@ -136,7 +136,7 @@ void persistText(struct UserObject* obj, FILE* file) {
 
 // TODO write bezier
 
-#define BEZIER_RESOLUTION 100
+#define BEZIER_RESOLUTION 10
 void bezierFunction(float* pi) {
     // pi is a list of p1x, p1y, p2x, p2y...
     // Look at the point order in the following function

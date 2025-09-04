@@ -1,5 +1,5 @@
 #!/bin/bash
 
 set -e
-gcc geometer.c render_tools.c execute.c lock.c -lSDL3 -lm -g
+gcc geometer.c render_tools.c execute.c lock.c -lSDL3 -lm -g -fsanitize=address -fno-omit-frame-pointer
 ./a.out

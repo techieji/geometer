@@ -91,6 +91,7 @@ void draw(struct UserObject* obj);
 
 // execute.c
 void execute(char* str);
+void shortcut(char c);
 
 // lock.c
 bool lock(float* x, float* y);

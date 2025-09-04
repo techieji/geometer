@@ -73,6 +73,7 @@ bool mainloop(void) {
                 if (e.text.text[0] == ':') mode = MO_COMMAND;
                 if (mode == MO_COMMAND || mode == OBJ_TEXT)
                     cursor = SDL_strlcat(buffer, e.text.text, sizeof(buffer));
+                if (mode == MO_NORMAL) shortcut(e.text.text[0]);
                 break;
             case SDL_EVENT_MOUSE_BUTTON_DOWN:
                 if (ip != NULL) addPoint(x, y);
