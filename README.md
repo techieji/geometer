@@ -14,7 +14,7 @@ and planned features should help with making it more so.
 - [x] Creating bezier curves
 - [x] Creating arcs
 - [x] Deleting elements
-- [ ] Editing elements (need to implement a node system)
+- [ ] Editing elements
 - [ ] Persistence
 - [ ] Saving to a TeX file
 - [ ] Having a relatively complete command language

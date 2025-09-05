@@ -36,6 +36,8 @@ void addPoint(float x, float y) {
     ip->arr[ip->filled_elems++] = y;
 }
 
+///// Line
+
 struct UserObject* drawIntermediateLine(float x, float y) {
     switch (ip->filled_elems/2) {
         case 2: return toUserObject();
@@ -54,11 +56,11 @@ void persistLine(struct UserObject* obj, FILE* file) {
             obj->p1x, obj->p1y, obj->p2x, obj->p2y);
 }
 
+///// Circle
+
 void renderArc(float r, float x, float y, float start_angle, float end_angle) {
-#define ARC_RESOLUTION 1000
-    //for (float t = fmod(start_angle, 2*M_PI); t < fmod(end_angle, 2*M_PI); t = fmod(t + 0.001, 2*M_PI))
-    //    SDL_RenderPoint(renderer, r*cos(t) + x, r*sin(t) + y);
-    for (int i = 0; i < ARC_RESOLUTION; i++) {
+#define ARC_RESOLUTION 100
+    for (int i = 0; i < ARC_RESOLUTION * (r + 10); i++) {
         float t = start_angle + i * (end_angle - start_angle)/ARC_RESOLUTION;
         SDL_RenderPoint(renderer, r*cos(t) + x, r*sin(t) + y);
     }

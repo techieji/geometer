@@ -7,7 +7,7 @@ char buffer[256];
 uint8_t cursor = 0;
 enum OperationMode mode = MO_NORMAL;
 bool locked = false;
-struct UserObject* locked_on = NULL;     // not necessarily defined with locked is true
+struct UserObject* locked_on = NULL;     // not necessarily defined with locked being true
 
 struct IntermediatePoints* ip = NULL;
 struct UserObjectList objects = { NULL, NULL };
