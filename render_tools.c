@@ -53,7 +53,7 @@ void drawLine(struct UserObject* obj) {
 
 void persistLine(struct UserObject* obj, FILE* file) {
     fprintf(file, "\\draw[] (%fpt, %fpt) -- (%fpt, %fpt);\n",
-            obj->p1x, obj->p1y, obj->p2x, obj->p2y);
+            obj->p1x, -obj->p1y, obj->p2x, -obj->p2y);
 }
 
 ///// Circle
@@ -88,7 +88,7 @@ void drawCircle(struct UserObject* obj) {
 
 void persistCircle(struct UserObject* obj, FILE* file) {
     float r = sqrtf(pow(obj->p1x - obj->p2x, 2) + pow(obj->p1y - obj->p2y, 2));
-    fprintf(file, "\\draw[] (%fpt, %fpt) circle (%fpt);\n", obj->p1x, obj->p1y, r);
+    fprintf(file, "\\draw[] (%fpt, %fpt) circle (%fpt);\n", obj->p1x, -obj->p1y, r);
 }
 
 struct UserObject* drawIntermediateArc(float x, float y) {
@@ -147,7 +147,7 @@ void drawText(struct UserObject* obj) {
 }
 
 void persistText(struct UserObject* obj, FILE* file) {
-    fprintf(file, "\\node[anchor=northwest] at (%fpt, %fpt) {%s};\n",
+    fprintf(file, "\\node[anchor=north west] at (%fpt, -%fpt) {%s};\n",
             obj->p1x, obj->p1y, obj->text);
 }
 
@@ -201,6 +201,12 @@ void drawBezier(struct UserObject* obj) {
     bezierFunction(&(obj->p1x));    // Should work?
 }
 
+void persistBezier(struct UserObject* obj, FILE* file) {
+    fprintf(file, "\\draw (%fpt, -%fpt) .. controls (%fpt, -%fpt) and (%fpt, -%fpt) .. (%fpt, -%fpt);\n",
+            obj->p1x, obj->p1y, obj->p2x, obj->p2y, 2*obj->p3x - obj->p4x, 2*obj->p3y - obj->p4y, obj->p3x, obj->p3y);
+}
+
+
 void append(struct UserObjectList* l, struct UserObject* obj) {
     if (l->head == NULL) {
         l->head = l->tail = malloc(sizeof(struct UserObjectSeq));
@@ -233,7 +239,7 @@ const struct ObjectType types[] = {
     { OBJ_LINE, "-- LINE --", drawIntermediateLine, drawLine, persistLine },
     { OBJ_CIRCLE, "-- CIRCLE --", drawIntermediateCircle, drawCircle, persistCircle },
     { OBJ_TEXT, "-- TEXT --", drawIntermediateText, drawText, persistText },
-    { OBJ_BEZIER, "-- BEZIER --", drawIntermediateBezier, drawBezier, NULL },   // FIXME: implement persistBezier
+    { OBJ_BEZIER, "-- BEZIER --", drawIntermediateBezier, drawBezier, persistBezier },
     { OBJ_ARC, "-- ARC --", drawIntermediateArc, drawArc, NULL },
     { -100, NULL, NULL, NULL, NULL }       // Sentinel value?
 };

@@ -56,7 +56,7 @@ bool mainloop(void) {
                 }
                 break;
             case SDL_EVENT_TEXT_INPUT:   // Place keys into command buffer
-                if (strlen(buffer) == 0) mode = MO_NORMAL;
+                if (strlen(buffer) == 0 && mode != OBJ_TEXT) mode = MO_NORMAL;
                 if (e.text.text[0] == ':') mode = MO_COMMAND;
                 if (mode == MO_COMMAND || mode == OBJ_TEXT)
                     cursor = SDL_strlcat(buffer, e.text.text, sizeof(buffer));
